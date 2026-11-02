@@ -1,0 +1,56 @@
+# docgen configuration — run with:  python -m docgen
+title: OnePortal — OBS & OpenSearch services
+
+# Folder that contains one sub-folder per service repository.
+source_root: D:/VNPT/OnePortal/source_code
+
+# Where the docs are written (relative to this file).
+output_dir: output
+
+# Services to document. Their callees are added automatically up to `depth` hops.
+# Use ["*"] (or --all on the CLI) to document the whole workspace.
+targets:
+  - obs-service
+  - opensearch-service
+  - apigw-service
+
+# 1 = targets + the services they call directly; 2 = also the callees' callees; -1 = unlimited
+depth: -1
+
+# Which relationships pull a service into scope.
+#   http      -> Feign / REST clients
+#   grpc      -> gRPC stubs (resolved when a workspace project implements the proto service)
+#   messaging -> consumers of Kafka topics / RabbitMQ exchanges the service publishes to
+follow: [http, grpc, messaging]
+
+# Extra folders to skip while scanning (build output, logs... are skipped by default).
+excludes: []
+
+# Workspace folders that are not services.
+ignore_projects: [idg-jen, k8s]
+
+# Map names used in code to workspace folder names when they differ.
+# (spring.application.name, context-path, artifactId and go module names are matched automatically)
+aliases: {}
+#  k8s-agent: k8s_helm_sdk
+
+# Map gRPC client names (grpc.client.<name>) to a workspace folder if the server lives here.
+grpc_aliases: {}
+#  grpc-provisions-service: provisions-service
+
+# Python modules that register extra analyzers (see README "Adding a language").
+plugins: []
+
+# Feature / function diagrams (Java services): one flowchart per controller, listener group and
+# job group, plus one sequence diagram per endpoint, listener and scheduled job.
+features:
+  enabled: true
+  max_depth: 6         # how deep to follow service -> service -> helper calls
+  max_steps: 80        # cap per sequence diagram (calls, notes, self calls) to keep it readable
+  control_flow: true   # show if/else (alt), loops, catch (opt) and thrown exceptions
+  self_calls: true     # show private helper methods as self-calls
+  # Packages (first segment under the base package) whose classes are not followed.
+  # Default: dto, entity, model, enums, constants, exception, utils, config, aop, filter, request(s), response(s), jpa
+  # skip_packages: [dto, entity, model, enums, constants, exception, utils, config]
+
+formats: [markdown, json, html]
